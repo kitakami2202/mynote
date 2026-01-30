@@ -49,6 +49,7 @@ export const useNoteStore = create<NoteState>((set, get) => ({
       set({ notes, noteTree, isLoading: false });
     } catch (error) {
       console.error("Failed to load notes:", error);
+      alert(`ノートの読み込みに失敗しました: ${error}`);
       set({ isLoading: false });
     }
   },
@@ -63,19 +64,25 @@ export const useNoteStore = create<NoteState>((set, get) => ({
   },
 
   createNote: async (parentId: number | null) => {
-    const newId = await db.createNote(parentId);
-    await get().loadNotes();
+    try {
+      const newId = await db.createNote(parentId);
+      await get().loadNotes();
 
-    // Expand parent if creating a child
-    if (parentId !== null) {
-      const expandedIds = new Set(get().expandedIds);
-      expandedIds.add(parentId);
-      set({ expandedIds });
+      // Expand parent if creating a child
+      if (parentId !== null) {
+        const expandedIds = new Set(get().expandedIds);
+        expandedIds.add(parentId);
+        set({ expandedIds });
+      }
+
+      // Select the new note
+      await get().selectNote(newId);
+      return newId;
+    } catch (error) {
+      console.error("Failed to create note:", error);
+      alert(`ノートの作成に失敗しました: ${error}`);
+      throw error;
     }
-
-    // Select the new note
-    await get().selectNote(newId);
-    return newId;
   },
 
   updateNote: async (

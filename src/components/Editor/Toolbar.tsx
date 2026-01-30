@@ -5,9 +5,11 @@ import styles from "./Editor.module.css";
 
 interface ToolbarProps {
   editor: Editor | null;
+  lineHeight: number;
+  onLineHeightChange: (value: number) => void;
 }
 
-export function Toolbar({ editor }: ToolbarProps) {
+export function Toolbar({ editor, lineHeight, onLineHeightChange }: ToolbarProps) {
   if (!editor) {
     return null;
   }
@@ -119,6 +121,25 @@ export function Toolbar({ editor }: ToolbarProps) {
       <button onClick={handleImageInsert} title="画像を挿入">
         🖼
       </button>
+
+      <span className={styles.separator} />
+
+      <label className={styles.lineHeightLabel} title="行間">
+        行間:
+        <select
+          value={lineHeight}
+          onChange={(e) => onLineHeightChange(parseFloat(e.target.value))}
+          className={styles.lineHeightSelect}
+        >
+          <option value="1">1.0 (狭い)</option>
+          <option value="1.2">1.2</option>
+          <option value="1.4">1.4</option>
+          <option value="1.6">1.6 (標準)</option>
+          <option value="1.8">1.8</option>
+          <option value="2">2.0 (広い)</option>
+          <option value="2.5">2.5</option>
+        </select>
+      </label>
     </div>
   );
 }

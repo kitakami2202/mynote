@@ -2,10 +2,67 @@ import Database from "@tauri-apps/plugin-sql";
 import type { Note, Attachment, NoteTreeNode } from "../types";
 
 let db: Database | null = null;
+let initialized = false;
+
+async function initializeDatabase(database: Database): Promise<void> {
+  if (initialized) return;
+
+  try {
+    // Create notes table
+    console.log("Creating notes table...");
+    await database.execute(`
+      CREATE TABLE IF NOT EXISTS notes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        parent_id INTEGER,
+        title TEXT NOT NULL DEFAULT 'New Note',
+        content TEXT DEFAULT '',
+        position INTEGER NOT NULL DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (parent_id) REFERENCES notes(id) ON DELETE CASCADE
+      )
+    `);
+
+    // Create attachments table
+    console.log("Creating attachments table...");
+    await database.execute(`
+      CREATE TABLE IF NOT EXISTS attachments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        note_id INTEGER NOT NULL,
+        filename TEXT NOT NULL,
+        file_path TEXT NOT NULL,
+        mime_type TEXT,
+        file_size INTEGER,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE
+      )
+    `);
+
+    // Create indexes
+    console.log("Creating indexes...");
+    await database.execute(`CREATE INDEX IF NOT EXISTS idx_notes_parent_id ON notes(parent_id)`);
+    await database.execute(`CREATE INDEX IF NOT EXISTS idx_attachments_note_id ON attachments(note_id)`);
+
+    initialized = true;
+    console.log("All tables and indexes created successfully");
+  } catch (error) {
+    console.error("Failed to create tables:", error);
+    throw error;
+  }
+}
 
 export async function getDatabase(): Promise<Database> {
   if (!db) {
-    db = await Database.load("sqlite:mynote.db");
+    try {
+      console.log("Connecting to database...");
+      db = await Database.load("sqlite:mynote.db");
+      console.log("Database connected, initializing tables...");
+      await initializeDatabase(db);
+      console.log("Database initialized successfully");
+    } catch (error) {
+      console.error("Failed to initialize database:", error);
+      throw error;
+    }
   }
   return db;
 }

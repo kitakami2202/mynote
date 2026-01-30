@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useDraggable, useDroppable } from "@dnd-kit/core";
 import type { NoteTreeNode } from "../../types";
 import { useNoteStore } from "../../stores/noteStore";
 import styles from "./TreeView.module.css";
@@ -6,9 +7,25 @@ import styles from "./TreeView.module.css";
 interface TreeNodeProps {
   node: NoteTreeNode;
   level: number;
+  isLast?: boolean;
 }
 
-export function TreeNode({ node, level }: TreeNodeProps) {
+// Drop zone for inserting between nodes
+function DropZone({ id, level }: { id: string; level: number }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`${styles.dropZone} ${isOver ? styles.dropZoneActive : ""}`}
+      style={{ paddingLeft: `${level * 16 + 8}px` }}
+    >
+      <div className={styles.dropZoneLine} />
+    </div>
+  );
+}
+
+export function TreeNode({ node, level, isLast = false }: TreeNodeProps) {
   const {
     selectedNoteId,
     expandedIds,
@@ -30,6 +47,27 @@ export function TreeNode({ node, level }: TreeNodeProps) {
   const isSelected = selectedNoteId === node.id;
   const isExpanded = expandedIds.has(node.id);
   const hasChildren = node.children.length > 0;
+
+  // Draggable setup
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setDragRef,
+    isDragging,
+  } = useDraggable({
+    id: node.id,
+  });
+
+  // Droppable for becoming a child
+  const { setNodeRef: setDropRef, isOver } = useDroppable({
+    id: `child-${node.id}`,
+  });
+
+  // Combine refs
+  const setRefs = (element: HTMLDivElement | null) => {
+    setDragRef(element);
+    setDropRef(element);
+  };
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -102,12 +140,18 @@ export function TreeNode({ node, level }: TreeNodeProps) {
 
   return (
     <div className={styles.nodeContainer}>
+      {/* Drop zone before this node (for inserting as sibling) */}
+      <DropZone id={`before-${node.id}`} level={level} />
+
       <div
-        className={`${styles.node} ${isSelected ? styles.selected : ""}`}
+        ref={setRefs}
+        className={`${styles.node} ${isSelected ? styles.selected : ""} ${isDragging ? styles.dragging : ""} ${isOver ? styles.dropTarget : ""}`}
         style={{ paddingLeft: `${level * 16 + 8}px` }}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onContextMenu={handleContextMenu}
+        {...attributes}
+        {...listeners}
       >
         <span
           className={`${styles.toggle} ${hasChildren ? styles.hasChildren : ""}`}
@@ -134,9 +178,19 @@ export function TreeNode({ node, level }: TreeNodeProps) {
 
       {isExpanded &&
         hasChildren &&
-        node.children.map((child) => (
-          <TreeNode key={child.id} node={child} level={level + 1} />
+        node.children.map((child, index) => (
+          <TreeNode
+            key={child.id}
+            node={child}
+            level={level + 1}
+            isLast={index === node.children.length - 1}
+          />
         ))}
+
+      {/* Drop zone after the last node in a group */}
+      {isLast && (
+        <DropZone id={`after-${node.id}`} level={level} />
+      )}
 
       {contextMenu && (
         <>

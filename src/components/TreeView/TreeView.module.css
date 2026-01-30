@@ -189,3 +189,56 @@
   border-top: 1px solid #eee;
   margin: 4px 0;
 }
+
+/* Drag and Drop styles */
+.node.dragging {
+  opacity: 0.5;
+}
+
+.node.dropTarget {
+  background-color: #c8e6ff;
+  border: 2px dashed #4a90d9;
+  border-radius: 4px;
+}
+
+.dragOverlay {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  background-color: white;
+  border: 1px solid #4a90d9;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  font-size: 13px;
+  color: #333;
+  cursor: grabbing;
+}
+
+/* Drop zone between nodes */
+.dropZone {
+  height: 4px;
+  position: relative;
+  transition: height 0.15s ease;
+}
+
+.dropZone:hover,
+.dropZoneActive {
+  height: 8px;
+}
+
+.dropZoneLine {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 50%;
+  height: 2px;
+  background-color: transparent;
+  border-radius: 1px;
+  transform: translateY(-50%);
+  transition: background-color 0.15s ease;
+}
+
+.dropZoneActive .dropZoneLine {
+  background-color: #4a90d9;
+  height: 3px;
+}

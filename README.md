@@ -1,73 +1,56 @@
-# React + TypeScript + Vite
+# MyNote
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+OneNoteライクなノートアプリケーション。Tauri + React + TypeScriptで構築。
 
-Currently, two official plugins are available:
+## 機能
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 階層構造のノート管理（ツリービュー）
+- ドラッグ＆ドロップによるノートの並び替え
+- リッチテキストエディタ（TipTap）
+  - 太字、斜体、下線
+  - 見出し（H1、H2、H3）
+  - 箇条書き、番号付きリスト
+  - 画像挿入
+  - Tab/Shift+Tabでインデント調整
+  - 行間調整
+- SQLiteによるローカルデータ保存
+- 自動保存
 
-## React Compiler
+## 必要環境
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js 18以上
+- Rust（Tauriビルド用）
+- Windows 10/11
 
-## Expanding the ESLint configuration
+## 開発
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+```bash
+# 依存関係のインストール
+npm install
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 開発サーバー起動
+npm run tauri dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## ビルド
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+# 本番ビルド
+npm run tauri build
 ```
+
+ビルド成果物は `src-tauri/target/release/bundle/` に生成されます。
+
+- `nsis/mynote_x.x.x_x64-setup.exe` - インストーラー（推奨）
+- `msi/mynote_x.x.x_x64_en-US.msi` - MSIパッケージ
+
+## 技術スタック
+
+- **フロントエンド**: React, TypeScript, TipTap, @dnd-kit
+- **バックエンド**: Tauri 2.0, Rust
+- **データベース**: SQLite（tauri-plugin-sql）
+- **ビルドツール**: Vite
+
+## ライセンス
+
+MIT

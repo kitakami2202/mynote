@@ -27,3 +27,14 @@ npm-debug.log*
 # Database (local development)
 *.db
 *.db-journal
+
+# Signing keys
+~/.tauri/
+~.tauri/
+~
+
+# CLI dependencies
+cli/node_modules/
+
+# Windows special files
+nul

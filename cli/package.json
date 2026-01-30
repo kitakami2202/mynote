@@ -1,0 +1,17 @@
+{
+  "name": "mynote-cli",
+  "version": "1.0.0",
+  "description": "CLI tool to log updates to MyNote from any project",
+  "main": "index.js",
+  "bin": {
+    "mynote-log": "./index.js"
+  },
+  "type": "module",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "dependencies": {
+    "commander": "^12.0.0",
+    "sql.js": "^1.10.0"
+  }
+}
